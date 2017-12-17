@@ -17,7 +17,8 @@ public class App
     private static class TelemetryDataPoint {
         public String deviceId;
         public double temperature;
-        public double humidity;
+        public double speed;
+        public int  pieceNumber;
 
         public String serialize() {
             Gson gson = new Gson();
@@ -36,32 +37,56 @@ public class App
         }
     }
     private static class MessageSender implements Runnable {
+        private static int getRandomNumberInRange(int min, int max) {
 
+            if (min >= max) {
+                throw new IllegalArgumentException("max must be greater than min");
+            }
+
+            Random r = new Random();
+            return r.nextInt((max - min) + 1) + min;
+        }
         public void run()  {
             try {
                 double minTemperature = 20;
-                double minHumidity = 60;
+                double minSpeed =0;
+                double maxTemperature=80;
+                double maxSpeed= 280;
+                int minPieceNumber=0;
                 Random rand = new Random();
+                int i=1;
+                int j=5;
+                double currentTemperature=minTemperature,currentSpeed=minSpeed;
 
                 while (true) {
                     String msgStr;
                     Message msg;
-                    if (new Random().nextDouble() > 0.7) {
-                        msgStr = "This is a critical message.";
-                        msg = new Message(msgStr);
-                        msg.setProperty("level", "critical");
-                    } else {
-                        double currentTemperature = minTemperature + rand.nextDouble() * 15;
-                        double currentHumidity = minHumidity + rand.nextDouble() * 20;
-                        TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
-                        telemetryDataPoint.deviceId = deviceId;
-                        telemetryDataPoint.temperature = currentTemperature;
-                        telemetryDataPoint.humidity = currentHumidity;
 
-                        msgStr = telemetryDataPoint.serialize();
-                        msg = new Message(msgStr);
-                    }
 
+
+
+                    currentTemperature=minTemperature +getRandomNumberInRange(i,j)/3;
+                    currentSpeed= minSpeed + getRandomNumberInRange(i,j)/5;
+
+
+                    if (currentTemperature<=maxTemperature){}
+                   else if (currentTemperature>maxTemperature){
+                        msgStr="Temperature Alert";
+                        msg= new Message(msgStr);
+                        msg.setProperty("Level","Critical");
+
+                   }
+                    int currentPieceNumber=minPieceNumber++;
+                    TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
+                    telemetryDataPoint.deviceId = deviceId;
+                    telemetryDataPoint.temperature = currentTemperature;
+                    telemetryDataPoint.speed = currentSpeed;
+                    telemetryDataPoint.pieceNumber= currentPieceNumber;
+
+                     msgStr = telemetryDataPoint.serialize();
+                     msg = new Message(msgStr);
+                    msg.setProperty("temperatureAlert", (currentTemperature > 30) ? "true" : "false");
+                    msg.setMessageId(java.util.UUID.randomUUID().toString());
                     System.out.println("Sending: " + msgStr);
 
                     Object lockobj = new Object();
@@ -72,6 +97,12 @@ public class App
                         lockobj.wait();
                     }
                     Thread.sleep(1000);
+                    i++;
+                    j=j+2;
+                    if(currentTemperature>30){
+                        msg.setProperty("temperatureAlert","high");
+
+                    }
                 }
             } catch (InterruptedException e) {
                 System.out.println("Finished.");
@@ -87,10 +118,14 @@ public class App
     }
     public static void main( String[] args ) throws IOException, URISyntaxException {
         client = new DeviceClient(connString, protocol);
-
-        MessageCallback callback = new AppMessageCallback();
-        client.setMessageCallback(callback, null);
         client.open();
+        client.toString();
+
+        MessageSender sender = new MessageSender();
+        sender.run();
+
+        System.in.read();
+        client.closeNow();
     }
 }
 
