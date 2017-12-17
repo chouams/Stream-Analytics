@@ -1,0 +1,27 @@
+{% extends "header.html" %}
+
+{% block body %}
+
+        <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
+          <h1>Neue Maschine</h1>
+
+          <form action="" method="post">
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="1">Name</label>
+    	    <input type="text" id="1" class="form-control" placeholder = "Name" name="machinename" value="{{request.form.machinename}}">
+	   </div>
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="2">Standort</label>
+            <input type="text" id="2" class="form-control" placeholder = "Standort" name="facility" value="{{request.form.facility}}">
+  	   </div>
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="3">Sonstiges</label>
+            <input type="text" id="3" class="form-control" placeholder = "Sonstiges" name="sonstiges" value="{{request.form.sonstiges}}">
+  	   </div>
+	  <button type="submit" class="btn btn-primary">erstellen</button>
+	</form>
+	<p>{{error}}<p/>
+       </main>
+
+
+{% endblock %}

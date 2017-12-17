@@ -7,7 +7,7 @@
     <meta name="author" content="">
     <link rel="icon" href="{{url_for('static', filename= 'favicon.ico')}}">
 
-    <title>Dashboard</title>
+    <title>Stream-Analytics</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{{url_for('static', filename= 'css/bootstrap.min.css')}}" rel="stylesheet">
@@ -27,7 +27,7 @@
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Settings</a>
@@ -64,21 +64,26 @@
               <a class="nav-link" href="#">Export</a>
             </li>
           </ul>
-	<nav class="dropdown show">
-  		<a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    			Maschinen
-  		</a>
-
-  	<nav class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-
-		{% for m in MACHINE_DICT["Machines"] %}
-              			<a class="dropdown-item" href="{{m[1]}}">{{m[0]}}</a>
-		{% endfor %}
-        </nav>
+	 <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="/create/">Maschine erstellen</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"></a>
+            </li>
+          </ul>
 	</nav>
-	</nav>
+       </div>
 </div>
-</div>
+
+	
+
     {% block body %}{% endblock %}
 
     <!-- Bootstrap core JavaScript
