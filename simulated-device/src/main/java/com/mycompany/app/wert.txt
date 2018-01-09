@@ -1,0 +1,5 @@
+minTemperature  : 20
+minSpeed : 0
+maxTemperature : 80
+maxSpeed : 280
+mongoId    :  5a54860f36017575ed89cd38
