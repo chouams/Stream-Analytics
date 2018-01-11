@@ -2,33 +2,27 @@ package com.mycompany.app;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.*;
-import javafx.beans.property.IntegerProperty;
+
+import java.io.*;
+import java.util.Properties;
+
 
 import java.io.IOException;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.Map;
 import java.net.URISyntaxException;
 import java.util.Random;
 
 public class App
 {
-    private static String connString1 = "HostName=iothub-0f09bdec.azure-devices.net;DeviceId=htw-device;SharedAccessKey=n3i6d/C1tSnnbo0mv8KU1sSlOvvx6AOK5yN8rP4ToDQ=";
-   private static String connString2="HostName=iothub-0f09bdec.azure-devices.net;DeviceId=htw-device2;SharedAccessKey=+XXJfI4/L0iTOi4zZNCCjV2u142280F92Akbk/FSRsE=";
+    private static String connString = "HostName=iothub-0f09bdec.azure-devices.net;DeviceId=htw-device;SharedAccessKey=n3i6d/C1tSnnbo0mv8KU1sSlOvvx6AOK5yN8rP4ToDQ=";
     private static IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
     private static String deviceId = "htw-device";
-    private static String DeviceId2="htw-device2";
-    private static DeviceClient client1;
-    private static DeviceClient client2;
+    private static DeviceClient client;
 
-    public static class TelemetryDataPoint {
-        public String mongoId;
+    private static class TelemetryDataPoint {
         public String deviceId;
         public double temperature;
         public double speed;
         public int  pieceNumber;
-        public Date Date;
-        public String time;
 
         public String serialize() {
             Gson gson = new Gson();
@@ -48,26 +42,49 @@ public class App
         }
     }
     //endregion
-    public static class MessageSender implements Runnable {
-
-
-        int minTemperature ;
-        int minSpeed;
-        int maxTemperature;
-        int maxSpeed;
-        String dbID;
-
-        public MessageSender(int minTemperature, int minSpeed, int maxTemperature, int maxSpeed, String mongoId) {
-            this.minTemperature = minTemperature;
-            this.minSpeed = minSpeed;
-            this.maxTemperature = maxTemperature;
-            this.maxSpeed = maxSpeed;
-            this.dbID=mongoId;
+    private static class MessageSender implements Runnable {
+        //region Getter and Setter
+        public double getMinTemperature() {
+            return minTemperature;
         }
+
+        public void setMinTemperature(double minTemperature) {
+            this.minTemperature = minTemperature;
+        }
+
+        public double getMinSpeed() {
+            return minSpeed;
+        }
+
+        public void setMinSpeed(double minSpeed) {
+            this.minSpeed = minSpeed;
+        }
+
+        public double getMaxTemperature() {
+            return maxTemperature;
+        }
+
+        public void setMaxTemperature(double maxTemperature) {
+            this.maxTemperature = maxTemperature;
+        }
+
+        public double getMaxSpeed() {
+            return maxSpeed;
+        }
+
+        public void setMaxSpeed(double maxSpeed) {
+            this.maxSpeed = maxSpeed;
+        }
+        //endregion
+
+        double minTemperature = 20;
+        double minSpeed =0;
+        double maxTemperature=80;
+        double maxSpeed= 280;
 
         private static double getRandomNumberInRange(int min, int max) {
 
-            if (min > max) {
+            if (min >= max) {
                 int a= min;
                 min=max;
                 max  =a;
@@ -79,12 +96,11 @@ public class App
         }
         public void run()  {
             try {
-                ReadFiles readFiles=new ReadFiles();
                 int minPieceNumber=0;
                 Random rand = new Random();
                 int i=1;
-                int j=6;
-                double currentTemperature = minTemperature,currentSpeed = minSpeed;
+                int j=5;
+                double currentTemperature=minTemperature,currentSpeed=minSpeed;
                 int currentPieceNumber;
 
 
@@ -93,20 +109,85 @@ public class App
                         String msgStr;
                         Message msg;
 
-                        currentSpeed+=getRandomNumberInRange(i,j)/3;
-                        currentTemperature+=getRandomNumberInRange(i,j)/9;
+
+
+                        if (currentSpeed>=maxSpeed){
+                            while (currentSpeed>maxSpeed)
+                            {
+                                currentSpeed+=getRandomNumberInRange(j,i);
+                                currentSpeed=getRandomNumberInRange(i,j)/23;
+                                currentTemperature+= getRandomNumberInRange(i, j)/15;
+                                currentPieceNumber = minPieceNumber++;
+                                TelemetryDataPoint telemetryDataPoint= new TelemetryDataPoint();
+                                telemetryDataPoint.deviceId=deviceId;
+                                telemetryDataPoint.temperature=currentTemperature;
+                                telemetryDataPoint.speed=currentSpeed;
+                                telemetryDataPoint.pieceNumber=currentPieceNumber;
+                                msgStr=telemetryDataPoint.serialize();
+                                msg=new Message(msgStr);
+                                msg.setProperty("Level","Critical");
+                                // msg.setProperty("temperatureAlert", (currentTemperature > maxTemperature) ? "true" : "false");
+                                msg.setMessageId(java.util.UUID.randomUUID().toString());
+                                System.out.println("Sending: " + msgStr);
+
+                                Object lockobj = new Object();
+                                EventCallback callback = new EventCallback();
+                                client.sendEventAsync(msg, callback, lockobj);
+
+                                synchronized (lockobj) {
+                                    lockobj.wait();
+                                }
+                                Thread.sleep(1000);
+
+
+                            }
+                        }
+
+
+                        if (currentTemperature<=maxTemperature){
+                            currentTemperature +=getRandomNumberInRange(i,j)/3;
+                            //currentSpeed += getRandomNumberInRange(i,j)/5;
+                        }
+                        else if (currentTemperature>maxTemperature){
+                            while(i*j>0){
+                                // msgStr="Temperature Alert";
+                                // msg= new Message(msgStr);
+
+                                currentSpeed=getRandomNumberInRange(i,j)/23;
+                                currentTemperature+= getRandomNumberInRange(i, j)/15;
+                                currentPieceNumber = minPieceNumber++;
+                                TelemetryDataPoint telemetryDataPoint= new TelemetryDataPoint();
+                                telemetryDataPoint.deviceId=deviceId;
+                                telemetryDataPoint.temperature=currentTemperature;
+                                telemetryDataPoint.speed=currentSpeed;
+                                telemetryDataPoint.pieceNumber=currentPieceNumber;
+                                msgStr=telemetryDataPoint.serialize();
+                                msg=new Message(msgStr);
+                                msg.setProperty("Level","Critical");
+                                // msg.setProperty("temperatureAlert", (currentTemperature > maxTemperature) ? "true" : "false");
+                                msg.setMessageId(java.util.UUID.randomUUID().toString());
+                                System.out.println("Sending: " + msgStr);
+
+                                Object lockobj = new Object();
+                                EventCallback callback = new EventCallback();
+                                client.sendEventAsync(msg, callback, lockobj);
+
+                                synchronized (lockobj) {
+                                    lockobj.wait();
+                                }
+                                Thread.sleep(1000);
+
+                                i--;
+                                j--;}
+                        }
+                        currentSpeed+=getRandomNumberInRange(i,j);
+                        currentSpeed+=getRandomNumberInRange(i,j);
                         currentPieceNumber = minPieceNumber++;
                         TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
-                        telemetryDataPoint.deviceId =deviceId;
-                        telemetryDataPoint.mongoId=dbID;
+                        telemetryDataPoint.deviceId = deviceId;
                         telemetryDataPoint.temperature = currentTemperature;
                         telemetryDataPoint.speed = currentSpeed;
                         telemetryDataPoint.pieceNumber= currentPieceNumber;
-                        Date date= new Date( System.currentTimeMillis() );
-                        telemetryDataPoint.Date=date;
-                        SimpleDateFormat sdf =new SimpleDateFormat("HH:mm:ss");
-                        telemetryDataPoint.time =sdf.format(date);
-
 
                         msgStr = telemetryDataPoint.serialize();
                         msg = new Message(msgStr);
@@ -116,46 +197,16 @@ public class App
 
                         Object lockobj = new Object();
                         EventCallback callback = new EventCallback();
-                        client1.sendEventAsync(msg, callback, lockobj);
-                       // client2.sendEventAsync(msg,callback,lockobj);
+                        client.sendEventAsync(msg, callback, lockobj);
 
                         synchronized (lockobj) {
                             lockobj.wait();
                         }
                         Thread.sleep(1000);
+                        i++;
+                        j=j+2;
 
-                        if (currentSpeed>=maxSpeed |currentTemperature>maxTemperature){
-                            if(currentSpeed>maxSpeed){currentSpeed-=getRandomNumberInRange(i,j)/3;}
-                            if(currentTemperature>maxTemperature){currentTemperature-=getRandomNumberInRange(i,j)/5;}
-                        currentPieceNumber = minPieceNumber++;
-                        telemetryDataPoint = new TelemetryDataPoint();
-                        telemetryDataPoint.deviceId=deviceId;
-                        telemetryDataPoint.mongoId=dbID;
-                        telemetryDataPoint.temperature = currentTemperature;
-                        telemetryDataPoint.speed = currentSpeed;
-                        telemetryDataPoint.pieceNumber= currentPieceNumber;
-                        date= new Date( System.currentTimeMillis() );
-                        telemetryDataPoint.Date=date;
-                        sdf =new SimpleDateFormat("HH:mm:ss");
-                        telemetryDataPoint.time =sdf.format(date);
-
-
-                        msgStr = telemetryDataPoint.serialize();
-                        msg = new Message(msgStr);
-                        msg.setProperty("temperatureAlert", (currentTemperature > maxTemperature) ? "true" : "false");
-                        msg.setMessageId(java.util.UUID.randomUUID().toString());
-                        System.out.println("Sending: " + msgStr);
-
-                         lockobj = new Object();
-                         callback = new EventCallback();
-                        client1.sendEventAsync(msg, callback, lockobj);
-                        // client2.sendEventAsync(msg,callback,lockobj);
-
-                        synchronized (lockobj) {
-                            lockobj.wait();
-                        }
-                        Thread.sleep(1000);}
-                                        }
+                    }
 
             } catch (InterruptedException e) {
                 System.out.println("Finished.");
@@ -170,23 +221,16 @@ public class App
         }
     }
     public static void main( String[] args ) throws IOException, URISyntaxException {
-        client1 = new DeviceClient(connString1, protocol);
-        client2= new DeviceClient(connString2,protocol);
 
-        String path="C:\\Users\\chouams\\Desktop\\iot-java-get-started12\\simulated-device\\src\\main\\java\\com\\mycompany\\app\\wert.txt";
-       Map<String,String> Dictionary= ReadFiles.readfile(path);
+        client = new DeviceClient(connString, protocol);
+        client.open();
+        client.toString();
 
-        client1.open();
-        client2.open();
-        client1.toString();
-        client2.toString();
-
-        MessageSender sender = new MessageSender(Integer.parseInt(Dictionary.get("minTemperature")),Integer.parseInt(Dictionary.get("minSpeed")),Integer.parseInt(Dictionary.get("maxTemperature")),Integer.parseInt(Dictionary.get("maxSpeed")),Dictionary.get("mongoId"));
+        MessageSender sender = new MessageSender();
         sender.run();
 
-
-        client1.closeNow();
-        client2.closeNow();
+        System.in.read();
+        client.closeNow();
     }
 }
 
