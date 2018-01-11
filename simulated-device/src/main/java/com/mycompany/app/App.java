@@ -33,6 +33,7 @@ public class App
         public Date Datum;
         public String Uhrzeit;
 
+
         public String serialize() {
             Gson gson = new Gson();
             return gson.toJson(this);
@@ -59,13 +60,15 @@ public class App
         int maxTemperature;
         int maxSpeed;
         String dbID;
+        int TimeIntevall;
 
-        public MessageSender(int minTemperature, int minSpeed, int maxTemperature, int maxSpeed, String mongoId) {
+        public MessageSender(int minTemperature, int minSpeed, int maxTemperature, int maxSpeed, String mongoId, int TimeIntervall) {
             this.minTemperature = minTemperature;
             this.minSpeed = minSpeed;
             this.maxTemperature = maxTemperature;
             this.maxSpeed = maxSpeed;
             this.dbID=mongoId;
+            this.TimeIntevall=TimeIntervall;
         }
 public static double getDoubleRound(double zahl,int Nachkommastelle ){
                     double Zahlx=zahl;
@@ -131,7 +134,7 @@ public static double getDoubleRound(double zahl,int Nachkommastelle ){
                         synchronized (lockobj) {
                             lockobj.wait();
                         }
-                        Thread.sleep(1000);
+                        Thread.sleep(TimeIntevall);
 
                         if (currentSpeed>=maxSpeed |currentTemperature>maxTemperature){
                             if(currentSpeed>maxSpeed){currentSpeed-=getRandomNumberInRange(i,j)/3;}
@@ -163,7 +166,7 @@ public static double getDoubleRound(double zahl,int Nachkommastelle ){
                         synchronized (lockobj) {
                             lockobj.wait();
                         }
-                        Thread.sleep(1000);}
+                        Thread.sleep(TimeIntevall);}
                                         }
 
             } catch (InterruptedException e) {
@@ -190,7 +193,7 @@ public static double getDoubleRound(double zahl,int Nachkommastelle ){
         client1.toString();
         client2.toString();
 
-        MessageSender sender = new MessageSender(Integer.parseInt(Dictionary.get("minTemperature")),Integer.parseInt(Dictionary.get("minSpeed")),Integer.parseInt(Dictionary.get("maxTemperature")),Integer.parseInt(Dictionary.get("maxSpeed")),Dictionary.get("mongoId"));
+        MessageSender sender = new MessageSender(Integer.parseInt(Dictionary.get("minTemperature")),Integer.parseInt(Dictionary.get("minSpeed")),Integer.parseInt(Dictionary.get("maxTemperature")),Integer.parseInt(Dictionary.get("maxSpeed")),Dictionary.get("mongoId"),Integer.parseInt(Dictionary.get("TimeIntervall")));
         sender.run();
 
 
