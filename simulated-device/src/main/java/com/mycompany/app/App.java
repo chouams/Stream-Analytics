@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.net.URISyntaxException;
 import java.util.Random;
-import java.text.*;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
@@ -27,7 +26,7 @@ public class App
     public static class TelemetryDataPoint {
         public String mongoId;
         public String deviceId;
-        public double Temperature;
+        public double Temperatur;
         public double Geschwindigkeit;
         public int Stückzahl;
         public Date Datum;
@@ -111,7 +110,7 @@ public static double getDoubleRound(double zahl,int Nachkommastelle ){
                         TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
                         telemetryDataPoint.deviceId =deviceId;
                         telemetryDataPoint.mongoId=dbID;
-                        telemetryDataPoint.Temperature = getDoubleRound(currentTemperature,3);
+                        telemetryDataPoint.Temperatur = getDoubleRound(currentTemperature,3);
                         telemetryDataPoint.Geschwindigkeit = getDoubleRound(currentSpeed,3);
                         telemetryDataPoint.Stückzahl = currentPieceNumber;
                         Date date= new Date( System.currentTimeMillis() );
@@ -143,7 +142,7 @@ public static double getDoubleRound(double zahl,int Nachkommastelle ){
                         telemetryDataPoint = new TelemetryDataPoint();
                         telemetryDataPoint.deviceId=deviceId;
                         telemetryDataPoint.mongoId=dbID;
-                        telemetryDataPoint.Temperature = getDoubleRound(currentTemperature,2);
+                        telemetryDataPoint.Temperatur = getDoubleRound(currentTemperature,2);
                         telemetryDataPoint.Geschwindigkeit = getDoubleRound(currentSpeed,2);
                         telemetryDataPoint.Stückzahl = currentPieceNumber;
                         date= new Date( System.currentTimeMillis() );
@@ -185,20 +184,22 @@ public static double getDoubleRound(double zahl,int Nachkommastelle ){
         client1 = new DeviceClient(connString1, protocol);
         client2= new DeviceClient(connString2,protocol);
 
-        String path="C:\\Users\\chouams\\Desktop\\iot-java-get-started12\\simulated-device\\src\\main\\java\\com\\mycompany\\app\\wert.txt";
-       Map<String,String> Dictionary= ReadFiles.readfile(path);
+      //  String path="C:\\Users\\chouams\\Desktop\\iot-java-get-started12\\simulated-device\\src\\main\\java\\com\\mycompany\\app\\Config_maschine 1.txt";
+        String path="C:\\Users\\chouams\\Desktop\\iot-java-get-started12\\simulated-device\\src\\main\\java\\com\\mycompany\\app\\Config_maschine 2.txt";
+
+        Map<String,String> Dictionary= ReadFiles.readfile(path);
 
         client1.open();
-        client2.open();
+        //client2.open();
         client1.toString();
-        client2.toString();
+       // client2.toString();
 
         MessageSender sender = new MessageSender(Integer.parseInt(Dictionary.get("minTemperature")),Integer.parseInt(Dictionary.get("minSpeed")),Integer.parseInt(Dictionary.get("maxTemperature")),Integer.parseInt(Dictionary.get("maxSpeed")),Dictionary.get("mongoId"),Integer.parseInt(Dictionary.get("TimeIntervall")));
         sender.run();
 
 
         client1.closeNow();
-        client2.closeNow();
+      //  client2.closeNow();
     }
 }
 
