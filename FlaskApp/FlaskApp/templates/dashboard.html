@@ -17,18 +17,17 @@
                 </tr>
               </thead>
               <tbody>
-		{% for m in MACHINE_DICT["Machines"] %}
-              	<tr>
-                  <td><a href="{{m[1]}}">{{m[2]}}</td>
-                  <td>{{m[3]}}</td>
-                  <td>{{m[0]}}</td>
-                  <td>{{m[4]}}</td>
-                  <td>{{m[5]}}</td>
-		</tr>
-		{% endfor %}
-                
+		{% for machine in user_machines %}
+		 <tr>
+		  <td><a href={{url_for('machine', _id = machine._id)}}> {{machine._id}}</a></td>
+		  <td> {{machine.Standort}}</td>
+		  <td> {{machine.Maschine}}</td>
+		  <td> {{machine.Standort}}</td>
+		  <td> {{machine.Sonstiges}}</td>
+		 </tr>
+                {% endfor %}
               </tbody>
-            </table>
+            </table>	 
           </div>
         </main>
       
