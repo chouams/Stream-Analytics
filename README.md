@@ -24,12 +24,13 @@ All these data are sent in real time, following a delay that can be changed in t
 # Config-files 
 
 this application is configured thanks to a config file containing the following structure:
+
 	minTemperature: Minimum temperature value
 	minSpeed: Minimum speed value
 	maxTemperature: value of the maximum temperature
 	maxSpeed: maximum speed value
-	mongoId: Ideal for the database (data in milliseconds)
-	TimeIntervall: Intervall of time where data will be sent to the cloud. 
+	mongoId: Id for the database
+	TimeIntervall: Intervall of time where data will be sent to the cloud (given in milliseconds). 
 
 The config file is read by the application and its extension is "txt".
 for the settings to be made in the config file,
