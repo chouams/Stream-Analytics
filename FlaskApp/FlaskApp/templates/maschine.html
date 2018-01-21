@@ -1,37 +1,76 @@
 {% extends "header.html" %}
 
 {% block body %}
+<script type="text/javascript">
+$(document).ready(function(){
+    //connect to the socket server.
+    var numbers_received = [];
+    var socket = io.connect('46.101.144.109' + ':' + 5000 + '/live');
+    console.log( "ready!" );
+    //receive details from server
+    socket.on('newnumber', function(msg) {
+    });
+
+});
+//load chart
+$(document).ready(function() {
+table = $('#machinetable').DataTable({
+		buttons: [
+        	'pdf'
+    		]
+	});
+	table.buttons().container()
+		.insertBefore( '#machinetable_filter' );
+});
+</script>
 
         <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
-          <h1>{{Name}}</h1>
-
           <section class="row text-center placeholders">
             <div class="col-6 col-sm-3 placeholder">
-              <canvas id="UmdrehungenChart" width="200" height="200"></canvas>
-              <h4>Umdrehungen</h4>
-              <div class="text-muted">u/min</div>
+              <div>
+		<p>{% for key in numbers[0] %}
+                     {{key}}
+            	    {% endfor %}</p>
+	      </div>
+              <h4>Stueckzahl</h4>
+              <div class="text-muted"></div>
             </div>
             <div class="col-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIABAADcgwAAACwAAAAAAQABAAACAkQBADs=" width="200" height="200" class="img-fluid rounded-circle" alt="Generic placeholder thumbnail">
+              <div>
+		<p>{% for key in temperature[0] %}
+                     {{key}}
+            	    {% endfor %}</p>
+	      </div>
               <h4>Temperatur</h4>
-              <span class="text-muted">°C</span>
+              <span class="text-muted">C</span>
             </div>
             <div class="col-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIABAAJ12AAAACwAAAAAAQABAAACAkQBADs=" width="200" height="200" class="img-fluid rounded-circle" alt="Generic placeholder thumbnail">
+              <div>
+		<p>{% for value in speed[0] %}
+                     {{value}}
+            	    {% endfor %}</p>
+	      </div>
               <h4>Geschwindigkeit</h4>
               <span class="text-muted">m/s</span>
             </div>
-            <div class="col-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIABAADcgwAAACwAAAAAAQABAAACAkQBADs=" width="200" height="200" class="img-fluid rounded-circle" alt="Generic placeholder thumbnail">
-              <h4>sonstiges</h4>
-              <span class="text-muted">Something else</span>
-            </div>
           </section>
+	  <p>
+  	   <a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseTable" aria-expanded="false" aria-controls="collapseExample">Datentabelle</a>
+  	   <a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseGraph" aria-expanded="false" aria-controls="collapseExample">Datengraph</a>
+	  </p>
 
-          <h2>Section title</h2>
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
+          
+	  <br>
+	 <div class="collapse" id="collapseGraph">
+	  <div class="chart-container" style="width:100">
+	   <canvas id="chart"></canvas>
+	  </div>
+	 </div>
+
+	 <div class="collapse" id="collapseTable">
+          <div class="table">
+            <table class="table table-striped table-bordered" id="machinetable" cellspacing="0">
+              <thead class="thead-dark">
 		<tr>
                  {% for key in werte[0] %}
 		  <th>{{key}}</th>
@@ -49,15 +88,57 @@
               </tbody>
             </table>
           </div>
+	 </div>
         </main>
 <script>
-var ctx = document.getElementById("UmdrehungenChart").getContext("2d");
-
-var myDoughnutChart = new Chart(ctx, {
-    		type: 'doughnut',
-    		data: data,
-    		options: options
-		});
+//formatting chartData
+var chartData = {
+  labels : [{% for time in times %}
+	    {% for key, value in time.items() %}
+             "{{value}}",
+            {% endfor %}
+	    {% endfor %}],
+  datasets : [{
+             label: "Temperatur",
+	     backgroundColor:'rgba(255, 64, 64, 1)',
+	     borderColor:'rgba(255, 64, 64, 1)',
+             data: [{% for temp in temperature %}
+		    {% for key,value in temp.items() %}
+                     "{{value}}",
+            	    {% endfor %}
+		    {% endfor %}],
+                    fill: false,
+                },
+		{
+             label: "Geschwindigkeit",
+	     backgroundColor:'rgba(72, 118, 255, 1)',
+	     borderColor:'rgba(72, 118, 255, 1)',
+             data: [{% for v in speed %}
+		    {% for key,value in v.items() %}
+                     "{{value}}",
+            	    {% endfor %}
+		    {% endfor %}],
+                    fill: false,
+                },
+		{
+             label: "Stueckzahl",
+	     backgroundColor:'rgba(0, 0, 0, 1)',
+	     borderColor:'rgba(0, 0, 0, 1)',
+             data: [{% for num in numbers %}
+		    {% for key,value in num.items() %}
+                     "{{value}}",
+            	    {% endfor %}
+		    {% endfor %}],
+                    fill: false,
+                }]
+}
+// get chart canvas
+var ctx = document.getElementById("chart").getContext("2d");
+// create the chart using the chart canvas
+var myChart = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  responsive: true
+});
 </script>
-
 {% endblock %}

@@ -3,14 +3,18 @@
 	<main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
 	 <div class="container">
 	  <br>
-	  <h4>Please Login:</h4>
+	  <h4>Bitte Einloggen:</h4>
 	  <br>
 		<form action="" class="form-inline" method="post">
-		 <input type="text" class="form-control" placeholder = "Username" name="username" value="{{request.form.username}}">
-		 <input type="password" class="form-control" placeholder = "Password" name="password" value="{{request.form.password}}">
-		 <input class="btn btn-default" type="submit" value="Login">
+		 <input type="text" class="form-control" placeholder = "Nutzer" name="username" value="{{request.form.username}}">
+		 <input type="password" class="form-control" placeholder = "Passwort" name="password" value="{{request.form.password}}">
+		 <input class="btn btn-default" type="submit" value="Einloggen">
 		</form>
 		<p>{{error}}</p>
 	 </div>
-	<main/>
+	 <br>
+	 <div class="etc-login-form">
+	  <p>  Noch keinen Account? <a href="/register/">Hier registrieren</a></p>
+	 </div>
+	</main>
 {% endblock %}

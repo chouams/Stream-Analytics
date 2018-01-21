@@ -18,9 +18,25 @@
     	    <label class="col-form-label" for="3">Sonstiges</label>
             <input type="text" id="3" class="form-control" placeholder = "Sonstiges" name="sonstiges" value="{{request.form.sonstiges}}">
   	   </div>
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="4">maximale Temperatur</label>
+            <input type="number" id="4" class="form-control" placeholder = "C" name="maxtemp" value="{{request.form.maxtemp}}">
+  	   </div>
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="5">minimale Temperatur</label>
+            <input type="number" id="5" class="form-control" placeholder = "C" name="mintemp" value="{{request.form.mintemp}}">
+  	   </div>
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="6">maximale Geschwindigkeit</label>
+            <input type="number" id="6" class="form-control" placeholder = "m/s" name="maxv" value="{{request.form.maxv}}">
+  	   </div>
+  	   <div class="form-group">
+    	    <label class="col-form-label" for="7">minimale Geschwindigkeit</label>
+            <input type="number" id="7" class="form-control" placeholder = "m/s" name="minv" value="{{request.form.minv}}">
+  	   </div>
 	  <button type="submit" class="btn btn-primary">erstellen</button>
 	</form>
-	<p>{{error}}<p/>
+	<p>{{error}}</p>
        </main>
 
 
