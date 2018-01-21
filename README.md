@@ -1,13 +1,11 @@
-# Stream-Analytics
+﻿# Stream-Analytics
 Server-IP: 46.101.144.109
-bisher implimentiert: 
+server is running Ubuntu 16.04
+website implemented with Flask with Apache 2 Gateway on WSGI-Framework
+https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps
 
-	@46.101.144.109/login you can login with user:admin and pw:password 
-	@46.101.144.109/create you can create a Machine on your own, isnt diplayed yet in Dashboard due to missing database
-	@46.101.144.109/ you can see a list of Machines	
-	@46.101.144.109/machine you can see the chosen machine details, isnt displayed yet due to missing database
-	
-	
+Database running is Mongodb on mLab
+
 # Simulated-device 
 
 Simulated-device is an application written in Java that simulates the operation of a machine.  This applicaion sends telemetry data from the simulated device to the Cloud in real time. This telemetry data is sent directly to the cloud in the form of Gson data. 
